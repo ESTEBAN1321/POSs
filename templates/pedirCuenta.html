@@ -1,0 +1,171 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Pedidos Realizados</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            margin: 0;
+            padding: 0;
+            background-color: #f4f4f9;
+        }
+
+        h2 {
+            text-align: center;
+            padding: 20px;
+            background-color: #333;
+            color: white;
+        }
+
+        .orders-section {
+            padding: 20px;
+        }
+
+        .search-bar {
+            width: 100%;
+            padding: 10px;
+            margin-bottom: 20px;
+            font-size: 16px;
+            border: 1px solid #ddd;
+            border-radius: 5px;
+            box-sizing: border-box;
+        }
+
+        .back-button {
+            display: inline-block;
+            background-color: #4CAF50;
+            color: white;
+            padding: 10px 20px;
+            border-radius: 5px;
+            text-decoration: none;
+            font-size: 16px;
+            transition: background-color 0.3s;
+            margin-bottom: 20px;
+        }
+
+        .back-button:hover {
+            background-color: #45a049;
+        }
+
+        .order-table {
+            background-color: white;
+            padding: 15px;
+            margin-bottom: 20px;
+            border-radius: 5px;
+            box-shadow: 0 2px 5px rgba(0, 0, 0, 0.1);
+        }
+
+        .order-table h3 {
+            margin-top: 0;
+            color: #333;
+        }
+
+        .order-summary {
+            list-style: none;
+            padding: 0;
+            margin: 0;
+        }
+
+        .order-summary li {
+            margin-bottom: 10px;
+            padding: 10px;
+            background-color: #f9f9f9;
+            border-radius: 5px;
+            box-shadow: 0 1px 3px rgba(0, 0, 0, 0.05);
+        }
+
+        .create-bill-button {
+            background-color: #4CAF50;
+            color: white;
+            padding: 10px 15px;
+            border: none;
+            border-radius: 5px;
+            cursor: pointer;
+            font-size: 16px;
+            transition: background-color 0.3s;
+        }
+
+        .create-bill-button:hover {
+            background-color: #45a049;
+        }
+
+        .no-orders {
+            text-align: center;
+            color: #888;
+        }
+
+        /* Responsividad */
+        @media (max-width: 600px) {
+            .back-button {
+                font-size: 14px;
+                padding: 8px 16px;
+            }
+
+            .order-table {
+                padding: 10px;
+            }
+
+            .create-bill-button {
+                font-size: 14px;
+                padding: 8px 12px;
+            }
+        }
+    </style>
+</head>
+<body>
+    
+
+    <!-- Sección de pedidos -->
+    <section class="orders-section">
+        <h2>Pedidos Realizados</h2>
+        <!-- Botón Regresar -->
+        <a href="/worker" class="back-button">Regresar</a>
+        <!-- Campo de búsqueda -->
+        <input type="text" id="searchInput" class="search-bar" placeholder="Buscar por mesa o lugar..." onkeyup="filterOrders()">
+
+        {% if completed_by_table %}
+            {% for (table_number, lugar), orders in completed_by_table.items() %}
+            <div class="order-table" data-table-number="{{ table_number }}" data-lugar="{{ lugar }}">
+                <h3>Mesa: {{ table_number }} - Lugar: {{ lugar }}</h3>
+                <ul class="order-summary">
+                    <li><strong>Hora del Pedido:</strong> {{ orders[0].time_ordered }}</li> <!-- Mostrar solo la hora del primer pedido -->
+                </ul>
+                <!-- Botón para generar la cuenta de la mesa -->
+                <form action="/create_bill" method="POST">
+                    <input type="hidden" name="table_number" value="{{ table_number }}">
+                    <input type="hidden" name="lugar" value="{{ lugar }}">
+                    <button type="submit" class="create-bill-button">Crear Cuenta</button>
+                </form>
+            </div>
+            {% endfor %}
+        {% else %}
+            <p class="no-orders">No hay pedidos completados.</p>
+        {% endif %}
+    </section>
+
+    <script>
+        // Función para filtrar las mesas
+        function filterOrders() {
+            var input, filter, orderTables, table, tableNumber, lugar, i, txtValue;
+            input = document.getElementById('searchInput');
+            filter = input.value.toLowerCase();
+            orderTables = document.getElementsByClassName('order-table');
+
+            for (i = 0; i < orderTables.length; i++) {
+                table = orderTables[i];
+                tableNumber = table.getAttribute('data-table-number');
+                lugar = table.getAttribute('data-lugar');
+                txtValue = tableNumber + " " + lugar;
+
+                if (txtValue.toLowerCase().indexOf(filter) > -1) {
+                    table.style.display = "";
+                } else {
+                    table.style.display = "none";
+                }
+            }
+        }
+    </script>
+</body>
+</html>

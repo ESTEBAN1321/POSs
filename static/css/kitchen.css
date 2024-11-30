@@ -1,0 +1,132 @@
+body {
+    font-family: Arial, sans-serif;
+    margin: 0;
+    padding: 0;
+    background-color: #f8f9fa;
+}
+header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 10px 20px;
+    background-color: #343a40;
+    color: white;
+}
+header h1 {
+    margin: 0;
+    font-size: 1.5em;
+    text-align: center;
+    flex-grow: 1;
+}
+.back-button {
+    background-color: #007bff;
+    color: white;
+    border: none;
+    border-radius: 3px;
+    padding: 8px 12px;
+    font-size: 0.9em;
+    cursor: pointer;
+    text-decoration: none;
+    text-align: center;
+}
+.back-button:hover {
+    background-color: #0056b3;
+}
+.container {
+    display: flex;
+    flex-wrap: wrap;
+    justify-content: center;
+    gap: 15px;
+    padding: 20px;
+}
+.table-card {
+    background-color: white;
+    border: 1px solid #ddd;
+    border-radius: 5px;
+    width: 100%;
+    max-width: 280px;
+    box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+    padding: 15px;
+    box-sizing: border-box;
+    margin-bottom: 20px;
+}
+.table-card h3 {
+    margin: 0 0 10px 0;
+    font-size: 1.2em;
+    color: #343a40;
+    text-align: center;
+}
+.notes {
+    background-color: #f0f8ff;
+    border: 1px solid #87ceeb;
+    border-radius: 3px;
+    padding: 10px;
+    margin-bottom: 10px;
+}
+.notes h4 {
+    margin: 0 0 5px 0;
+    font-size: 1em;
+    color: #0056b3;
+}
+.table-card ul {
+    list-style: none;
+    padding: 0;
+    margin: 0;
+}
+.table-card li {
+    margin: 10px 0;
+    font-size: 0.9em;
+    color: #555;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    border-bottom: 1px solid #ddd;
+    padding-bottom: 5px;
+    position: relative;
+}
+.table-card li:last-child {
+    border-bottom: none;
+}
+.complete-button,
+.decrement-button {
+    padding: 5px 10px;
+    background-color: #28a745;
+    color: white;
+    border: none;
+    border-radius: 3px;
+    cursor: pointer;
+    font-size: 0.8em;
+}
+.complete-button:hover,
+.decrement-button:hover {
+    background-color: #218838;
+}
+.decrement-button {
+    background-color: #ff6347; /* Botón rojo */
+    margin-left: 10px;
+}
+.new-order-marker {
+    font-size: 0.7em;
+    color: #ff4500;
+    background-color: #ffe6e6;
+    padding: 2px 4px;
+    border-radius: 3px;
+    margin-left: 10px;
+}
+.order-time {
+    font-size: 0.75em;
+    color: #888;
+    margin-left: 10px;
+}
+
+/* Media Queries para pantallas pequeñas */
+@media (max-width: 768px) {
+    .container {
+        padding: 10px;
+        justify-content: space-between;
+    }
+    .table-card {
+        max-width: 100%;
+        width: 100%;
+    }
+}

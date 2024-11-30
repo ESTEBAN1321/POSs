@@ -1,0 +1,249 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Panel de Caja</title>
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/worker.css') }}">
+    <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+    <style>
+        
+
+
+    </style>
+    <script>
+        let currentPage = 1;
+        const productsPerPage = 4;
+
+        function showProducts() {
+            document.getElementById('mesaLugarSection').style.display = 'none';
+            document.getElementById('productosSection').style.display = 'block';
+            displayProducts(currentPage);
+        }
+
+        function showMesaLugar() {
+            document.getElementById('productosSection').style.display = 'none';
+            document.getElementById('mesaLugarSection').style.display = 'block';
+        }
+
+        function searchProduct() {
+            let input = document.getElementById('productSearch').value.toLowerCase();
+            let productList = document.getElementById('productList');
+            let products = productList.getElementsByTagName('li');
+
+            for (let i = 0; i < products.length; i++) {
+                let productName = products[i].textContent || products[i].innerText;
+                products[i].style.display = productName.toLowerCase().indexOf(input) > -1 ? '' : 'none';
+            }
+        }
+
+        function displayProducts(page) {
+            let productList = document.getElementById('productList');
+            let products = productList.getElementsByTagName('li');
+            let totalProducts = products.length;
+            let start = (page - 1) * productsPerPage;
+            let end = start + productsPerPage;
+
+            for (let i = 0; i < totalProducts; i++) {
+                products[i].style.display = 'none';
+            }
+
+            for (let i = start; i < end && i < totalProducts; i++) {
+                products[i].style.display = 'block';
+            }
+
+            document.getElementById('prevButton').style.display = page === 1 ? 'none' : 'inline-block';
+            document.getElementById('nextButton').style.display = end >= totalProducts ? 'none' : 'inline-block';
+        }
+
+        function generateUniqueId() {
+            return `order_${Date.now()}_${Math.floor(Math.random() * 1000)}`;
+        }
+
+        function sendOrder() {
+            let formData = new FormData(document.querySelector('.ticket-form'));
+            let orderDetails = {};
+
+            formData.forEach((value, key) => {
+                orderDetails[key] = value;
+            });
+
+            if (!orderDetails.order_id) {
+                orderDetails.order_id = generateUniqueId();
+            }
+
+            $.ajax({
+                url: "/create_ticket",
+                method: "POST",
+                data: JSON.stringify(orderDetails),
+                contentType: "application/json",
+                success: function(response) {
+                    alert("Pedido enviado exitosamente.");
+                    localStorage.removeItem('pendingOrder');
+                    location.reload();  // Recarga la página después de un envío exitoso
+                },
+                error: function() {
+                    alert("Error al enviar el pedido. Guardando para reintentar...");
+                    saveOrderToLocal(orderDetails);
+                }
+            });
+        }
+
+        function retrySendOrder(orderDetails, retries = 3) {
+            if (retries > 0) {
+                setTimeout(() => {
+                    $.ajax({
+                        url: "/create_ticket",
+                        method: "POST",
+                        data: JSON.stringify(orderDetails),
+                        contentType: "application/json",
+                        success: function() {
+                            alert("Pedido reenviado exitosamente.");
+                            localStorage.removeItem('pendingOrder');
+                        },
+                        error: function() {
+                            console.log(`Intento fallido. Restan ${retries - 1} intentos.`);
+                            retrySendOrder(orderDetails, retries - 1);
+                        }
+                    });
+                }, 3000);
+            } else {
+                alert("No se pudo enviar el pedido tras múltiples intentos.");
+            }
+        }
+
+        function saveOrderToLocal(orderDetails) {
+            localStorage.setItem('pendingOrder', JSON.stringify(orderDetails));
+        }
+
+        function sendPendingOrder() {
+            let pendingOrder = localStorage.getItem('pendingOrder');
+            if (pendingOrder) {
+                retrySendOrder(JSON.parse(pendingOrder));
+            }
+        }
+
+        window.onload = sendPendingOrder;
+
+        function previewTicket(event) {
+            event.preventDefault();
+            let tableNumber = document.querySelector('input[name="table_number"]').value;
+            let lugar = document.querySelector('select[name="lugar"]').value;
+            let note = document.getElementById('note').value;
+            let products = document.querySelectorAll('#productList li');
+            let ticketDetails = `Número de Mesa: ${tableNumber}\nLugar: ${lugar}\n\nProductos:\n`;
+
+            products.forEach(product => {
+                let productName = product.querySelector('label').textContent;
+                let quantity = product.querySelector('input').value;
+                if (quantity && quantity > 0) {
+                    ticketDetails += `${productName} - Cantidad: ${quantity}\n`;
+                }
+            });
+
+            if (note) {
+                ticketDetails += `\nNota: ${note}`;
+            }
+
+            if (ticketDetails !== `Número de Mesa: ${tableNumber}\nLugar: ${lugar}\n\nProductos:\n`) {
+                if (confirm(`Por favor, confirme los detalles del ticket:\n\n${ticketDetails}\n\n¿Desea generar el ticket?`)) {
+                    sendOrder();
+                }
+            } else {
+                alert('Debe seleccionar al menos un producto.');
+            }
+        }
+        function prevPage() {
+            if (currentPage > 1) {
+                currentPage--;
+                displayProducts(currentPage);
+            }
+        }
+
+        function nextPage() {
+            currentPage++;
+            displayProducts(currentPage);
+        }
+    </script>
+</head>
+<body>
+    <div class="barra">
+        {% if session.get('role') == 'admin' %}
+            <button id="toggle-sidebar" class="toggle-button">☰</button>
+            <div class="sidebar" id="sidebar">
+                <h2>Panel de Navegación</h2>
+                <a href="{{ url_for('admin') }}">Regresar al Panel de Administrador</a>
+                <a href="{{ url_for('kitchen') }}">Regresar al Panel de Cocina</a>
+            </div>
+        {% endif %}
+    </div>
+
+    <div class="main-content"> 
+        <div class="container">
+            <header>
+                <h1>Panel de Meseros</h1>
+            </header>
+
+            <main>
+                <h2>Crear Pedido</h2>
+                <form class="ticket-form">
+                    <div id="mesaLugarSection">
+                        <div class="form-group">
+                            <label for="table_number">Número de Mesa:</label>
+                            <input type="number" name="table_number" required>
+                        </div>
+                        <div class="form-group">
+                            <label for="lugar">Lugar:</label>
+                            <select name="lugar" required>
+                                <option value="Lg-Arriba">Lg-Arriba</option>
+                                <option value="Lg-Abajo">Lg-Abajo</option>
+                                <option value="Rs-Arriba">Rs-Arriba</option>
+                                <option value="Rs-Abajo">Rs-Abajo</option>
+                            </select>
+                        </div>
+                        <div class="form-group">
+                            <button type="button" class="submit-button" onclick="showProducts()">Siguiente</button>
+                        </div>
+                    </div>
+
+                    <div id="productosSection" style="display:none;">
+                        <div class="form-group">
+                            <label for="productSearch">Buscar Producto:</label>
+                            <input type="text" id="productSearch" onkeyup="searchProduct()" placeholder="Buscar producto...">
+                        </div>
+                        <div class="form-group">
+                            <ul id="productList" class="product-list">
+                                {% for product in products %}
+                                <li style="display:none;">
+                                    <label for="product_{{ product.id }}">{{ product.name }} (${{ product.price }})</label>
+                                    <input type="number" name="quantity_{{ product.id }}" min="0" placeholder="Cantidad">
+                                </li>
+                                {% endfor %}
+                            </ul>
+                        </div>
+                        <div class="form-group pagination-buttons">
+                            <button type="button" id="prevButton" class="regresar-button" onclick="prevPage()" style="display:none;">Anterior</button>
+                            <button type="button" id="nextButton" class="complete-button" onclick="nextPage()">Siguiente</button>
+                        </div>
+                        <div class="form-group">
+                            <label for="note">Nota (opcional):</label>
+                            <textarea name="note" id="note" placeholder="Escribe una nota..." rows="4" cols="50"></textarea>
+                        </div>
+                        <div class="form-group">
+                            <button type="button" class="regresar-button" onclick="showMesaLugar()">Regresar</button>
+                            <button type="button" onclick="previewTicket(event)" class="create-bill-button">Generar Ticket</button>
+                        </div>
+                    </div>
+                </form>
+            </main>
+
+            <footer>
+                <a href="/kitchen" class="kitchen">Pedidos Pendientes</a>
+            </footer>
+            <footer>
+                <a href="/pedir_cuenta" class="pedirCuenta">Pedir Cuenta</a>
+            </footer>
+        </div>
+    </div>
+</body>
+</html>

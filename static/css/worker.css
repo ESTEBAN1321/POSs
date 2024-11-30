@@ -1,0 +1,261 @@
+/* Estilos generales */
+body {
+    font-family: Arial, sans-serif;
+    background-color: #1f1f1f;
+    margin: 0;
+    padding: 0;
+    color: #eaeaea;
+}
+
+.container {
+    width: 80%;
+    margin: auto;
+    padding: 20px;
+    background: #2c2c2c;
+    border-radius: 8px;
+    box-shadow: 0 0 15px rgba(0, 0, 0, 0.5);
+}
+
+header {
+    text-align: center;
+    margin-bottom: 20px;
+}
+
+header h1 {
+    margin: 0;
+    color: #ffffff;
+}
+
+main {
+    padding: 20px;
+}
+
+h2 {
+    border-bottom: 2px solid #555;
+    padding-bottom: 10px;
+    color: #ffffff;
+}
+
+.ticket-form {
+    display: flex;
+    flex-direction: column;
+}
+
+.form-group {
+    margin-bottom: 15px;
+}
+
+.form-group label {
+    display: block;
+    margin-bottom: 5px;
+    color: #cccccc;
+}
+
+.form-group input,
+.form-group select,
+textarea {
+    width: 100%;
+    padding: 10px;
+    border: 1px solid #444;
+    background-color: #333;
+    color: #eaeaea;
+    border-radius: 4px;
+}
+
+.form-group input::placeholder,
+textarea::placeholder {
+    color: #777;
+}
+
+.product-list {
+    list-style: none;
+    padding: 0;
+}
+
+.product-list li {
+    margin-bottom: 10px;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+}
+
+.product-list li label {
+    flex-grow: 1;
+}
+
+.product-list li input {
+    width: 80px;
+    background-color: #333;
+    color: #eaeaea;
+    border: 1px solid #444;
+}
+
+.submit-button {
+    background-color: #007bff;
+    color: #ffffff;
+    border: none;
+    border-radius: 4px;
+    padding: 10px 20px;
+    cursor: pointer;
+    font-size: 18px;
+    transition: background-color 0.3s;
+}
+
+.submit-button:hover {
+    background-color: #0056b3;
+}
+
+footer {
+    text-align: center;
+    margin-top: 20px;
+}
+
+.logout-link {
+    color: #007bff;
+    text-decoration: none;
+}
+
+.logout-link:hover {
+    text-decoration: underline;
+}
+
+/* Sección adicional */
+.orders-section {
+    margin-bottom: 30px;
+}
+
+.order-table {
+    margin-bottom: 20px;
+    background-color: #333;
+    padding: 10px;
+    border-radius: 4px;
+}
+
+.order-list {
+    list-style-type: none;
+    padding: 0;
+}
+
+.order-item {
+    background-color: #444;
+    padding: 10px;
+    margin-bottom: 10px;
+    border-radius: 4px;
+    border: 1px solid #555;
+    color: #eaeaea;
+}
+
+.complete-button,
+.create-bill-button {
+    background-color: #28a745;
+    color: white;
+    border: none;
+    padding: 8px 16px;
+    border-radius: 4px;
+    cursor: pointer;
+    font-size: 14px;
+    margin-top: 5px;
+}
+
+.complete-button:hover,
+.create-bill-button:hover {
+    background-color: #218838;
+}
+
+.regresar-button{
+    background-color: #e31d1d;
+    color: white;
+    border: none;
+    padding: 8px 16px;
+    border-radius: 4px;
+    cursor: pointer;
+    font-size: 14px;
+    margin-top: 5px;
+}
+
+
+
+
+
+
+/* Barra lateral */
+.sidebar {
+    width: 250px;
+    background-color: #1e1e1e; /* Fondo oscuro */
+    padding: 10px;
+    display: block;
+}
+
+/* Título de la barra lateral */
+.sidebar h2 {
+    text-align: center;
+    color: #e0e0e0; /* Texto claro */
+    border-bottom: 2px solid #444; /* Línea sutil */
+    padding-bottom: 10px;
+}
+
+/* Enlaces de la barra lateral */
+.sidebar a {
+    display: block;
+    padding: 10px;
+    color: #bdbdbd; /* Gris claro */
+    text-decoration: none;
+}
+
+.sidebar a:hover {
+    background-color: #333; /* Fondo más claro al pasar el mouse */
+    color: #fff; /* Texto blanco al pasar */
+}
+
+/* Contenido principal */
+.main-content {
+    flex: 1;
+    padding: 10px;
+}
+
+/* Botón de alternar */
+.toggle-button {
+    margin: 10px;
+    padding: 10px 15px;
+    font-size: 18px;
+    cursor: pointer;
+    background-color: #007bff; /* Azul oscuro */
+    color: white;
+    border: none;
+    border-radius: 5px;
+}
+
+.toggle-button:hover {
+    background-color: #0056b3; /* Azul más intenso */
+}
+
+
+
+
+
+
+/* Estilos generales para el footer */
+footer {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    gap: 10px; /* Espacio entre los botones */
+    padding: 10px;
+    border-top: 1px solid #ddd; /* Línea superior para separar */
+}
+
+/* Estilos para los botones */
+footer a {
+    text-decoration: none;
+    color: white;
+    background-color: #007bff; /* Color del botón */
+    padding: 5px 20px;
+    border-radius: 5px;
+    font-size: 14px;
+    transition: background-color 0.3s ease;
+}
+
+/* Efecto hover */
+footer a:hover {
+    background-color: #0056b3;
+}

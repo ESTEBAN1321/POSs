@@ -1,0 +1,279 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Panel de Cocina</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            margin: 0;
+            padding: 0;
+            background-color: #f8f9fa;
+        }
+        header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 10px 20px;
+            background-color: #343a40;
+            color: white;
+        }
+        header h1 {
+            margin: 0;
+            font-size: 1.5em;
+            text-align: center;
+            flex-grow: 1;
+        }
+        .back-button {
+            background-color: #007bff;
+            color: white;
+            border: none;
+            border-radius: 3px;
+            padding: 8px 12px;
+            font-size: 0.9em;
+            cursor: pointer;
+            text-decoration: none;
+            text-align: center;
+        }
+        .back-button:hover {
+            background-color: #0056b3;
+        }
+        .container {
+            display: flex;
+            flex-wrap: wrap;
+            justify-content: center;
+            gap: 15px;
+            padding: 20px;
+        }
+        .table-card {
+            background-color: white;
+            border: 1px solid #ddd;
+            border-radius: 5px;
+            width: 100%;
+            max-width: 280px;
+            box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+            padding: 15px;
+            box-sizing: border-box;
+            margin-bottom: 20px;
+        }
+        .table-card h3 {
+            margin: 0 0 10px 0;
+            font-size: 1.2em;
+            color: #343a40;
+            text-align: center;
+        }
+        .notes {
+            background-color: #f0f8ff;
+            border: 1px solid #87ceeb;
+            border-radius: 3px;
+            padding: 10px;
+            margin-bottom: 10px;
+        }
+        .notes h4 {
+            margin: 0 0 5px 0;
+            font-size: 1em;
+            color: #0056b3;
+        }
+        .table-card ul {
+            list-style: none;
+            padding: 0;
+            margin: 0;
+        }
+        .table-card li {
+            margin: 10px 0;
+            font-size: 0.9em;
+            color: #555;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            border-bottom: 1px solid #ddd;
+            padding-bottom: 5px;
+            position: relative;
+        }
+        .table-card li:last-child {
+            border-bottom: none;
+        }
+        .complete-button,
+        .decrement-button {
+            padding: 5px 10px;
+            background-color: #28a745;
+            color: white;
+            border: none;
+            border-radius: 3px;
+            cursor: pointer;
+            font-size: 0.8em;
+        }
+        .complete-button:hover,
+        .decrement-button:hover {
+            background-color: #218838;
+        }
+        .decrement-button {
+            background-color: #ff6347; /* Botón rojo */
+            margin-left: 10px;
+        }
+        .new-order-marker {
+            font-size: 0.7em;
+            color: #ff4500;
+            background-color: #ffe6e6;
+            padding: 2px 4px;
+            border-radius: 3px;
+            margin-left: 10px;
+        }
+        .order-time {
+            font-size: 0.75em;
+            color: #888;
+            margin-left: 10px;
+        }
+
+        /* Media Queries para pantallas pequeñas */
+        @media (max-width: 768px) {
+            .container {
+                padding: 10px;
+                justify-content: space-between;
+            }
+            .table-card {
+                max-width: 100%;
+                width: 100%;
+            }
+        }
+    </style>
+</head>
+<body>
+    <header>
+        <a href="/worker" class="back-button">Regresar</a>
+        <h1>Panel de Cocina</h1>
+    </header>
+    <div class="container">
+        {% if pending_by_table %}
+            {% for (table_number, lugar), orders in pending_by_table.items() %}
+            <div class="table-card" data-table="{{ table_number }} {{ lugar }}">
+                <h3>Mesa {{ table_number }} - {{ lugar }}</h3>
+                <button class="complete-button" data-table="{{ table_number }}" data-lugar="{{ lugar }}">Completar todos los pedidos</button>
+                {% if (table_number, lugar) in notes_by_table %}
+                <div class="notes">
+                    <h4>Notas:</h4>
+                    <ul>
+                        {% for note in notes_by_table[(table_number, lugar)] %}
+                        <li>{{ note }}</li>
+                        {% endfor %}
+                    </ul>
+                </div>
+                {% endif %}
+                <ul>
+                    {% for order in orders %}
+                    <li>
+                        <div>
+                            <strong>{{ order.product_name }}</strong>
+                            <span>(x{{ order.quantity }})</span>
+                            <span class="order-time">{{ order.time_ordered }}</span>
+                        </div>
+                        <button class="complete-button" data-id="{{ order.id }}">✓</button>
+                        {% if order.quantity > 1 %}
+                            <button class="decrement-button" data-id="{{ order.id }}" data-quantity="{{ order.quantity }}">-1</button>
+                        {% endif %}
+                    </li>
+                    {% endfor %}
+                </ul>
+            </div>
+            {% endfor %}
+        {% else %}
+            <p>No hay pedidos pendientes.</p>
+        {% endif %}
+    </div>
+
+    <script>
+        document.addEventListener('DOMContentLoaded', () => {
+            // Funcionalidad para completar pedidos individuales
+            const individualButtons = document.querySelectorAll('.complete-button[data-id]');
+            individualButtons.forEach(button => {
+                button.addEventListener('click', function (event) {
+                    event.preventDefault();
+                    const orderId = this.getAttribute('data-id');
+                    if (!orderId) {
+                        console.error('ID de pedido no encontrado.');
+                        return;
+                    }
+
+                    fetch('/complete_order', {
+                        method: 'POST',
+                        headers: { 'Content-Type': 'application/json' },
+                        body: JSON.stringify({ id: orderId })
+                    })
+                    .then(response => {
+                        if (response.ok) {
+                            this.closest('li').remove();
+                        } else {
+                            console.error('Error al completar el pedido.');
+                        }
+                    })
+                    .catch(error => console.error('Error:', error));
+                });
+            });
+
+            // Funcionalidad para reducir la cantidad pendiente de un pedido
+           // Funcionalidad para reducir la cantidad pendiente de un pedido
+            const decrementButtons = document.querySelectorAll('.decrement-button[data-id]');
+            decrementButtons.forEach(button => {
+                button.addEventListener('click', function (event) {
+                    event.preventDefault();
+                    const orderId = this.getAttribute('data-id');
+                    const quantity = parseInt(this.getAttribute('data-quantity'), 10); // Asegúrate de convertir la cantidad a número
+                    if (!orderId || isNaN(quantity)) {
+                        console.error('Datos del pedido no encontrados.');
+                        return;
+                    }
+
+                    // Reducir cantidad pendiente en el servidor
+                    fetch('/decrement_order', {
+                        method: 'POST',
+                        headers: { 'Content-Type': 'application/json' },
+                        body: JSON.stringify({ id: orderId, quantity: 1 })  // Solo decrementa 1
+                    })
+                    .then(response => {
+                        if (response.ok) {
+                            const updatedQuantity = quantity - 1;
+                            // Actualizar cantidad en la interfaz
+                            this.setAttribute('data-quantity', updatedQuantity);
+
+                            // Si la cantidad es mayor que 1, actualiza el número
+                            if (updatedQuantity > 1) {
+                                this.closest('li').querySelector('span').textContent = `(x${updatedQuantity})`;
+                            } else {
+                                // Si la cantidad es 1, elimina el botón de decremento
+                                this.closest('li').querySelector('.decrement-button').remove();
+                            }
+                        } else {
+                            console.error('Error al reducir la cantidad del pedido.');
+                        }
+                    })
+                    .catch(error => console.error('Error:', error));
+                });
+            });
+
+            // Botones para completar todos los pedidos de una mesa
+            const tableButtons = document.querySelectorAll('.complete-button[data-table]');
+            tableButtons.forEach(button => {
+                button.addEventListener('click', function (event) {
+                    event.preventDefault();
+                    const tableNumber = this.getAttribute('data-table');
+                    const lugar = this.getAttribute('data-lugar');
+                    fetch('/complete_all_orders', {
+                        method: 'POST',
+                        headers: { 'Content-Type': 'application/json' },
+                        body: JSON.stringify({ table_number: tableNumber, lugar: lugar })
+                    })
+                    .then(response => {
+                        if (response.ok) {
+                            this.closest('.table-card').remove();
+                        } else {
+                            console.error('Error al completar todos los pedidos.');
+                        }
+                    })
+                    .catch(error => console.error('Error:', error));
+                });
+            });
+        });
+    </script>
+</body>
+</html>
